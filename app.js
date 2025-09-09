@@ -3,13 +3,13 @@ import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.g
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-    apiKey: "AIzaSyB6wfcw2AB2ATdG29MKdON2Wb1R2UH7Uuc",
-    authDomain: "taskdone-aca18.firebaseapp.com",
-    projectId: "taskdone-aca18",
-    storageBucket: "taskdone-aca18.appspot.com",
-    messagingSenderId: "1035778561207",
-    appId: "1:1035778561207:web:041497e4e0095e292c6932",
-    measurementId: "G-Q4M4V0C8EC"
+    apiKey: "AIzaSyCeTVg9d0NZOyq3zB5-tqiSl9-ywRUMSkg",
+    authDomain: "task-f8eb3.firebaseapp.com",
+    projectId: "task-f8eb3",
+    storageBucket: "task-f8eb3.appspot.com",
+    messagingSenderId: "809013258784",
+    appId: "1:809013258784:web:b78ada4b520d95da362a45",
+    measurementId: "G-DL8DB2F0BY"
 };
 
 // Initialize Firebase
@@ -96,3 +96,4 @@ submitBtn.addEventListener('click', async () => {
         loadingDiv.classList.add('hidden');
     }
 });
+

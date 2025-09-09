@@ -2,12 +2,13 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebas
 import { getFirestore, collection, getDocs, query, where, orderBy, Timestamp, getCountFromServer, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyB6wfcw2AB2ATdG29MKdON2Wb1R2UH7Uuc",
-    authDomain: "taskdone-aca18.firebaseapp.com",
-    projectId: "taskdone-aca18",
-    storageBucket: "taskdone-aca18.appspot.com",
-    messagingSenderId: "1035778561207",
-    appId: "1:1035778561207:web:041497e4e0095e292c6932",
+    apiKey: "AIzaSyCeTVg9d0NZOyq3zB5-tqiSl9-ywRUMSkg",
+    authDomain: "task-f8eb3.firebaseapp.com",
+    projectId: "task-f8eb3",
+    storageBucket: "task-f8eb3.appspot.com",
+    messagingSenderId: "809013258784",
+    appId: "1:809013258784:web:b78ada4b520d95da362a45",
+    measurementId: "G-DL8DB2F0BY"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -110,12 +111,12 @@ tableBody.addEventListener('click', async (event) => {
         if (isConfirmed) {
             try {
                 await deleteDoc(doc(db, 'submissions', docId));
-                event.target.closest('tr').remove();
                 
-                totalCountEl.textContent = parseInt(totalCountEl.textContent) - 1;
-                displayCountEl.textContent = parseInt(displayCountEl.textContent) - 1;
-
+                await fetchTotalCount(); 
+                
                 allSubmissions = allSubmissions.filter(sub => sub.id !== docId);
+                renderTable(allSubmissions);
+
                 alert('Submission deleted successfully!');
             } catch (error) {
                 console.error("Error deleting document: ", error);
@@ -151,3 +152,4 @@ window.addEventListener('DOMContentLoaded', () => {
     fetchSubmissions();
     fetchTotalCount();
 });
+
