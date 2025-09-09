@@ -1,8 +1,7 @@
-// 1. Firebase v9+ Modular SDK eken functions import karaganna
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
 import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
-// 2. Oyage Web App eke Firebase Configuration
+// Your web app's Firebase configuration
 const firebaseConfig = {
     apiKey: "AIzaSyB6wfcw2AB2ATdG29MKdON2Wb1R2UH7Uuc",
     authDomain: "taskdone-aca18.firebaseapp.com",
@@ -13,40 +12,43 @@ const firebaseConfig = {
     measurementId: "G-Q4M4V0C8EC"
 };
 
-// 3. Firebase Initialize karanna
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app); // Firestore database eka ganna
+const db = getFirestore(app);
 
-// 4. DOM Elements - HTML eke thiyena input fields serama select karaganna
+// DOM Elements
 const regNumberInput = document.getElementById('regNumber');
+const phoneInput = document.getElementById('phoneNumber');
+const districtInput = document.getElementById('district');
 const dateInput = document.getElementById('taskDate');
 const screenshotInput = document.getElementById('screenshot');
 const statusInput = document.getElementById('status');
 const submitBtn = document.getElementById('submitBtn');
 const loadingDiv = document.getElementById('loading');
 
-// 5. Submit Button eka click kalama wena dewal
 submitBtn.addEventListener('click', async () => {
-    // Input fields walin values ganna
+    // Get values from input fields
     const regNumber = regNumberInput.value;
+    const phoneNumber = phoneInput.value;
+    const district = districtInput.value;
     const selectedDate = dateInput.value;
     const screenshotFile = screenshotInput.files[0];
     const status = statusInput.value;
-    const apiKey = 'a5ebe079102608265e453fd45c90f790'; // ImgBB API Key eka
+    const apiKey = 'a5ebe079102608265e453fd45c90f790'; // ImgBB API Key
 
-    // --- Validation: Fields serama purawalada balanna ---
-    if (!regNumber || !selectedDate || !screenshotFile) {
-        alert('Please fill all fields: Register Number, Task Date, and Screenshot!');
-        return; // Fields madinam, methanin nawaththanna
+    // --- Validation ---
+    if (!regNumber || !phoneNumber || !district || !selectedDate || !screenshotFile) {
+        alert('Please fill all the fields!');
+        return;
     }
 
-    // --- Loading State: User ta wade wenawa kiyala pennanna ---
+    // --- Show Loading State ---
     submitBtn.disabled = true;
     submitBtn.innerText = 'Submitting...';
     loadingDiv.classList.remove('hidden');
 
     try {
-        // --- Step 1: Screenshot eka ImgBB ekata upload karanna ---
+        // --- Step 1: Upload image to ImgBB ---
         const formData = new FormData();
         formData.append('image', screenshotFile);
 
@@ -58,39 +60,37 @@ submitBtn.addEventListener('click', async () => {
         const imgbbResult = await imgbbResponse.json();
         
         if (!imgbbResult.success) {
-            // ImgBB eken error ekak awoth
-            throw new Error(imgbbResult.error.message || 'Image upload failed. Please try again.');
+            throw new Error(imgbbResult.error.message || 'Image upload failed.');
         }
 
-        const imageUrl = imgbbResult.data.url; // Upload karapu image eke URL eka
+        const imageUrl = imgbbResult.data.url;
 
-        // --- Step 2: Serama data Firestore eke save karanna ---
+        // --- Step 2: Save data to Firestore ---
         const submissionData = {
             regNumber: regNumber,
-            taskDate: selectedDate, // User select karapu date eka
-            screenshotURL: imageUrl, // ImgBB eken gaththa URL eka
+            phoneNumber: phoneNumber,
+            district: district,
+            taskDate: selectedDate,
+            screenshotURL: imageUrl,
             status: status,
-            submittedAt: serverTimestamp() // Submit karapu welawa save karanna
+            submittedAt: serverTimestamp()
         };
         
-        // 'submissions' kiyana collection ekata data ටික add karanna
-        const docRef = await addDoc(collection(db, "submissions"), submissionData);
-        console.log("Document written with ID: ", docRef.id);
-
+        await addDoc(collection(db, "submissions"), submissionData);
         alert('Submission successful! Thank you.');
         
-        // Form eka reset karanna
+        // Reset the form
         regNumberInput.value = '';
+        phoneInput.value = '';
+        districtInput.value = '';
         dateInput.value = '';
         screenshotInput.value = '';
-        statusInput.value = 'All tasks done';
 
     } catch (error) {
-        // Process eke mokak hari error ekak unoth
         console.error("Error:", error);
         alert(`An error occurred: ${error.message}`);
     } finally {
-        // --- Loading State eka iwara karanna ---
+        // --- Hide Loading State ---
         submitBtn.disabled = false;
         submitBtn.innerText = 'Submit Task';
         loadingDiv.classList.add('hidden');
