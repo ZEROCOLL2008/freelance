@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Submissions</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+        <h1 class="text-3xl font-bold mb-4 text-gray-800">Task Submissions</h1>
+
+        <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-800 p-4 mb-6 rounded-md shadow-sm" role="alert">
+            <p class="font-semibold text-lg">
+                <span class="align-middle">Total Submissions: </span>
+                <span id="totalCount" class="text-xl font-bold align-middle">...</span>
+                <span class="mx-2 align-middle">|</span>
+                <span class="align-middle">Currently Displaying: </span>
+                <span id="displayCount" class="text-xl font-bold align-middle">...</span>
+            </p>
+        </div>
+        <div class="bg-white p-4 rounded-lg shadow-md mb-6 flex flex-col sm:flex-row gap-4">
+            <div class="flex-grow">
+                <label for="searchInput" class="block text-sm font-medium text-gray-700">Search by Register Number</label>
+                <input type="text" id="searchInput" placeholder="Enter Reg No to search..." class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+            <div>
+                <label for="datePicker" class="block text-sm font-medium text-gray-700">Filter by Date</label>
+                <input type="date" id="datePicker" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+        </div>
+
+        <div class="bg-white shadow-md rounded-lg overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Register Number</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Task Date</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Submitted On</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Screenshot</th>
+                    </tr>
+                </thead>
+                <tbody id="submissionsTableBody" class="bg-white divide-y divide-gray-200">
+                    <tr>
+                        <td colspan="5" class="text-center p-8 text-gray-500" id="loadingState">
+                            Loading submissions...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="screenshotModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 hidden">
+        <div class="bg-white p-2 rounded-lg shadow-2xl max-w-4xl w-full relative">
+            <button id="closeModalBtn" class="absolute -top-3 -right-3 bg-red-500 text-white rounded-full h-8 w-8 flex items-center justify-center font-bold text-lg">&times;</button>
+            <img id="modalImage" src="" alt="Screenshot" class="w-full h-auto object-contain max-h-[85vh]">
+        </div>
+    </div>
+
+    <script src="admin.js" type="module"></script>
+</body>
+</html>
