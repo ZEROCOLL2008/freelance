@@ -152,4 +152,3 @@ window.addEventListener('DOMContentLoaded', () => {
     fetchSubmissions();
     fetchTotalCount();
 });
-
