@@ -5,7 +5,7 @@ const firebaseConfig = {
     apiKey: "AIzaSyCeTVg9d0NZOyq3zB5-tqiSl9-ywRUMSkg",
     authDomain: "task-f8eb3.firebaseapp.com",
     projectId: "task-f8eb3",
-    storageBucket: "task-f8eb3.appspot.com",
+    storageBucket: "task-f8eb3.firebasestorage.app",
     messagingSenderId: "809013258784",
     appId: "1:809013258784:web:b78ada4b520d95da362a45",
     measurementId: "G-DL8DB2F0BY"
@@ -14,22 +14,26 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+// Get all interactive elements from the DOM
 const tableBody = document.getElementById('submissionsTableBody');
 const searchInput = document.getElementById('searchInput');
 const datePicker = document.getElementById('datePicker');
+const divisionFilter = document.getElementById('divisionFilter'); // <-- ALUTH FILTER EKA
 const modal = document.getElementById('screenshotModal');
 const modalImage = document.getElementById('modalImage');
 const closeModalBtn = document.getElementById('closeModalBtn');
 const totalCountEl = document.getElementById('totalCount');
 const displayCountEl = document.getElementById('displayCount');
 
+// This array will hold all submissions fetched from Firestore for the selected date
 let allSubmissions = [];
 
+// Renders the table with the given data
 const renderTable = (submissions) => {
     displayCountEl.textContent = submissions.length;
-    tableBody.innerHTML = ''; 
+    tableBody.innerHTML = '';
 
-    if (submissions.length === 0) { 
+    if (submissions.length === 0) {
         tableBody.innerHTML = `<tr><td colspan="7" class="text-center p-8 text-gray-500">No submissions found.</td></tr>`;
         return;
     }
@@ -60,6 +64,34 @@ const renderTable = (submissions) => {
     });
 };
 
+// --- NEW FUNCTION TO APPLY ALL FILTERS ---
+// This central function applies filters based on search and division
+const applyFilters = () => {
+    const searchTerm = searchInput.value.toLowerCase();
+    const selectedDivision = divisionFilter.value;
+
+    let filteredSubmissions = allSubmissions;
+
+    // 1. Filter by search term (Register Number)
+    if (searchTerm) {
+        filteredSubmissions = filteredSubmissions.filter(sub =>
+            sub.regNumber.toLowerCase().includes(searchTerm)
+        );
+    }
+
+    // 2. Filter by selected division
+    if (selectedDivision) { // Only filter if a division is chosen (value is not empty)
+        filteredSubmissions = filteredSubmissions.filter(sub =>
+            sub.district === selectedDivision
+        );
+    }
+
+    // Finally, render the table with the fully filtered data
+    renderTable(filteredSubmissions);
+};
+
+
+// Fetches the total submission count from the server
 const fetchTotalCount = async () => {
     try {
         const submissionsCol = collection(db, 'submissions');
@@ -71,6 +103,7 @@ const fetchTotalCount = async () => {
     }
 };
 
+// Fetches submissions from Firestore based on the selected date
 const fetchSubmissions = async (filterDate = null) => {
     tableBody.innerHTML = `<tr><td colspan="7" class="text-center p-8 text-gray-500">Loading submissions...</td></tr>`;
     displayCountEl.textContent = '...';
@@ -89,13 +122,37 @@ const fetchSubmissions = async (filterDate = null) => {
         
         const querySnapshot = await getDocs(q);
         allSubmissions = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        renderTable(allSubmissions);
+        
+        // After fetching, apply any active filters
+        applyFilters(); // <-- IMPORTANT CHANGE HERE
+
     } catch (error) {
         console.error("Error fetching submissions: ", error);
         tableBody.innerHTML = `<tr><td colspan="7" class="text-center p-8 text-red-500">Error loading data.</td></tr>`;
     }
 };
 
+// --- EVENT LISTENERS ---
+
+// When the user types in the search box, apply filters
+searchInput.addEventListener('input', applyFilters);
+
+// When the user selects a division, apply filters
+divisionFilter.addEventListener('change', applyFilters);
+
+// When the user picks a date, fetch new data from the server
+datePicker.addEventListener('change', () => {
+    const selectedDateValue = datePicker.value;
+    if (selectedDateValue) {
+        const [year, month, day] = selectedDateValue.split('-');
+        const selectedDate = new Date(year, month - 1, day);
+        fetchSubmissions(selectedDate);
+    } else {
+        fetchSubmissions(); // Fetch all if date is cleared
+    }
+});
+
+// Modal and delete functionality (no changes needed here)
 const closeModal = () => { modal.classList.add('hidden'); modalImage.src = ''; };
 
 tableBody.addEventListener('click', async (event) => {
@@ -111,12 +168,10 @@ tableBody.addEventListener('click', async (event) => {
         if (isConfirmed) {
             try {
                 await deleteDoc(doc(db, 'submissions', docId));
-                
                 await fetchTotalCount(); 
-                
+                // Re-fetch or filter from local array to update the view
                 allSubmissions = allSubmissions.filter(sub => sub.id !== docId);
-                renderTable(allSubmissions);
-
+                applyFilters(); // Re-apply filters after deletion
                 alert('Submission deleted successfully!');
             } catch (error) {
                 console.error("Error deleting document: ", error);
@@ -129,25 +184,7 @@ tableBody.addEventListener('click', async (event) => {
 closeModalBtn.addEventListener('click', closeModal);
 modal.addEventListener('click', (event) => { if (event.target === modal) { closeModal(); } });
 
-searchInput.addEventListener('keyup', () => {
-    const searchTerm = searchInput.value.toLowerCase();
-    const filteredSubmissions = allSubmissions.filter(sub => 
-        sub.regNumber.toLowerCase().includes(searchTerm)
-    );
-    renderTable(filteredSubmissions);
-});
-
-datePicker.addEventListener('change', () => {
-    const selectedDateValue = datePicker.value;
-    if (selectedDateValue) {
-        const [year, month, day] = selectedDateValue.split('-');
-        const selectedDate = new Date(year, month - 1, day);
-        fetchSubmissions(selectedDate);
-    } else {
-        fetchSubmissions();
-    }
-});
-
+// Initial load when the page is ready
 window.addEventListener('DOMContentLoaded', () => {
     fetchSubmissions();
     fetchTotalCount();
